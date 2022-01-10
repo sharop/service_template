@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package log.v1;
+
+option go_package = "github.com/nomad/pb/log_v1";
+
+message GetServersRequest{}
+
+message GetServersResponse{
+  repeated Server servers = 1;
+}
+
+message Server{
+  string id =1;
+  string rpc_addr = 2;
+  bool is_leader = 3;
+}
+
+
+// -- CLIENT --- Request --> SERVER
+// -- CLIENT <-- Respond --- SERVER
+service Log{
+  //Unary call
+  rpc Produce(ProduceRequest) returns (ProduceResponse){};
+  //Unary call
+  rpc Consume(ConsumeRequest) returns (ConsumeResponse){};
+  // Streaming server
+  rpc ConsumeStream(ConsumeRequest) returns (stream ConsumeResponse){};
+  // Streaming bidirectional
+  rpc ProduceStream(stream ProduceRequest) returns (stream ProduceResponse) {};
+  // Unary call
+  rpc GetServers(GetServersRequest) returns (GetServersResponse) {};
+}
+
+message ProduceRequest {
+  Record record = 1;
+}
+
+message ProduceResponse {
+  string key = 1;
+}
+
+message ConsumeRequest {
+  string key = 1;
+}
+
+message ConsumeResponse{
+  Record record = 2;
+}
+
+message Record{
+  string key = 1;
+  string value = 2;
+}
